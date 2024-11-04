@@ -23,6 +23,6 @@ def read_braille_tokens():
 
 def add_braille_tokens(braille_token, tokenizer, model):
     special_tokens_dict = {"additional_special_tokens": braille_token}
-    tokenizer.add_special_tokens(special_tokens_dict, mean_resizing=False)
-    model.resize_token_embeddings(len(tokenizer))
+    tokenizer.add_special_tokens(special_tokens_dict)
+    model.resize_token_embeddings(len(tokenizer), mean_resizing=False)
     return tokenizer
