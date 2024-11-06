@@ -1,3 +1,4 @@
+import torch
 from transformers import (
     AutoModelForSeq2SeqLM,
     DataCollatorForSeq2Seq,
@@ -8,22 +9,23 @@ from transformers import (
 from evaluate import load
 from data import load_data, read_braille_tokens, add_braille_tokens
 import wandb
-
+import numpy as np
 
 wandb.init(
     project="braille-translator",
-    name="2024-11-04 -- 5epochs -- resumed training from 3000"
+    name="2024-11-05 -- 5epochs -- from scratch"
 )
 
-model_name = "/home/careforme.dropout/braille/results/241104/checkpoint-2800" # KETI-AIR/ke-t5-large-ko
-model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+model_name = "KETI-AIR/ke-t5-large-ko" # KETI-AIR/ke-t5-large-ko
+model = AutoModelForSeq2SeqLM.from_pretrained("/home/careforme.dropout/t5-large/results/241105/checkpoint-1200")
 tokenizer = AutoTokenizer.from_pretrained(model_name, legacy=False)
 wer_metric = load("wer")
 braille_dict = read_braille_tokens()
 
 # Read Braille characters as a list of special tokens
 braille_special_tokens = read_braille_tokens()
-add_braille_tokens(braille_dict, tokenizer, model)
+tokenizer = add_braille_tokens(braille_dict, tokenizer, model)
+
 
 def preprocess_function(examples, tokenizer, source_lang="한국어", target_lang="점자"):
     inputs = [f"{source_lang}를 {target_lang}로 변환하세요.\n{source_lang}: {ex}\n{target_lang}:" for ex in examples["source"]]
@@ -33,7 +35,7 @@ def preprocess_function(examples, tokenizer, source_lang="한국어", target_lan
     model_inputs["labels"] = labels["input_ids"]
     return model_inputs
 
-raw_datasets = load_data('data')
+raw_datasets = load_data('dataset')
 print(raw_datasets)
 
 # Split Datasets
@@ -45,23 +47,25 @@ tokenized_train = tokenized_train.remove_columns(['source', 'target'])
 
 tokenized_eval = raw_dataset_eval_test["train"].map(lambda x: preprocess_function(x, tokenizer), batched=True)
 tokenized_eval = tokenized_eval.remove_columns(['source', 'target'])
-tokenized_eval = tokenized_eval.select(range(10))
+tokenized_eval = tokenized_eval.select(range(20)).shuffle(seed=42)
 
 tokenized_test = raw_dataset_eval_test["test"].map(lambda x: preprocess_function(x, tokenizer), batched=True)
 tokenized_test = tokenized_test.remove_columns(['source', 'target'])
 
 
 def compute_metrics(eval_pred):
-    predictions, labels = eval_pred
-
-    # 0, 1, -100 token은 지워주기
-    predictions = [[token for token in pred if token not in (0, 1, -100)] for pred in predictions]
-    labels = [[token for token in label if token not in (0, 1, -100)] for label in labels]
-    print(predictions, labels)
+    predictions, labels = eval_pred # tuple
+    token_ids = (
+        [token for token in np.argmax(pred, axis=-1) if token not in [0, 1, -100]]  # Filter unwanted tokens
+        for pred in predictions[0]  # Iterate over predictions for each sequence
+    ) # np.array 3D -> 2D
 
     # Decode predictions and labels to text
-    decoded_preds = [trainer.tokenizer.decode(pred, skip_special_tokens=False) for pred in predictions]
-    decoded_labels = [trainer.tokenizer.decode(label, skip_special_tokens=False) for label in labels]
+    decoded_preds = tokenizer.batch_decode(token_ids, skip_special_tokens=False)
+    decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=False)
+
+    print("Decoded Predictions:", decoded_preds[0])
+    print("Decoded Labels:", decoded_labels[0])
 
     # Compute the WAR score
     wer_results = wer_metric.compute(predictions=decoded_preds, references=decoded_labels)
@@ -73,31 +77,31 @@ def compute_metrics(eval_pred):
 
 # Define training arguments
 training_args = Seq2SeqTrainingArguments(
-    output_dir="./results/241104",
-    per_device_train_batch_size=4,
-    per_device_eval_batch_size=2,
-    gradient_accumulation_steps=10,
-    num_train_epochs=1,
+    output_dir="./results/241106",
+    per_device_train_batch_size=10,
+    per_device_eval_batch_size=8,
+    gradient_accumulation_steps=20,
+    num_train_epochs=8,
     logging_dir='./logs',
-    logging_steps=30,
-    save_total_limit=5,
-    save_steps=200,
+    logging_steps=50,
+    save_total_limit=10,
+    save_steps=100,
     eval_strategy="steps",
-    eval_steps=200,
+    eval_steps=1,
     load_best_model_at_end=True,
-    learning_rate=2e-4,
+    learning_rate=1e-4,
     gradient_checkpointing=False,
-    optim="adafactor",
+    optim="paged_adamw_8bit",
     warmup_ratio=0.03,
     weight_decay=0.01,
     max_grad_norm=0.3,
     remove_unused_columns=False,
     bf16=True,
-    predict_with_generate=True,
+    predict_with_generate=False,
     report_to="wandb",
     metric_for_best_model="wer_score",
     greater_is_better=False,
-    run_name="2024-11-04 -- 1epochs -- resumed training from 3000",
+    run_name="2024-11-05 -- 5epochs -- from scratch",
     generation_max_length=128,
 )
 
@@ -111,7 +115,7 @@ trainer = Seq2SeqTrainer(
     eval_dataset=tokenized_eval,
     tokenizer=tokenizer,
     data_collator=data_collator,
-    compute_metrics = compute_metrics
+    compute_metrics=compute_metrics
 )
 
 # Start Training
