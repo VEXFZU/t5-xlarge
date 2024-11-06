@@ -13,7 +13,7 @@ import numpy as np
 
 wandb.init(
     project="braille-translator",
-    name="2024-11-05 -- 5epochs -- from scratch"
+    name="2024-11-06 -- 1epoch -- from scratch"
 )
 
 model_name = "KETI-AIR/ke-t5-large-ko" # KETI-AIR/ke-t5-large-ko
@@ -27,8 +27,8 @@ braille_special_tokens = read_braille_tokens()
 tokenizer = add_braille_tokens(braille_dict, tokenizer, model)
 
 
-def preprocess_function(examples, tokenizer, source_lang="한국어", target_lang="점자"):
-    inputs = [f"{source_lang}를 {target_lang}로 변환하세요.\n{source_lang}: {ex}\n{target_lang}:" for ex in examples["source"]]
+def preprocess_function(examples, tokenizer, source_lang="Korean", target_lang="Braille"):
+    inputs = [f"translate {source_lang} to {target_lang}: {ex}\n" for ex in examples["source"]]
     targets = examples["target"]
     model_inputs = tokenizer(inputs, max_length=128, truncation=True, padding=True)
     labels = tokenizer(targets, max_length=128, truncation=True, padding=True)
@@ -78,16 +78,16 @@ def compute_metrics(eval_pred):
 # Define training arguments
 training_args = Seq2SeqTrainingArguments(
     output_dir="./results/241106",
-    per_device_train_batch_size=10,
+    per_device_train_batch_size=12,
     per_device_eval_batch_size=8,
-    gradient_accumulation_steps=20,
-    num_train_epochs=8,
+    # gradient_accumulation_steps=10,
+    num_train_epochs=1,
     logging_dir='./logs',
     logging_steps=50,
     save_total_limit=10,
-    save_steps=100,
+    save_steps=500,
     eval_strategy="steps",
-    eval_steps=1,
+    eval_steps=250,
     load_best_model_at_end=True,
     learning_rate=1e-4,
     gradient_checkpointing=False,
@@ -101,7 +101,7 @@ training_args = Seq2SeqTrainingArguments(
     report_to="wandb",
     metric_for_best_model="wer_score",
     greater_is_better=False,
-    run_name="2024-11-05 -- 5epochs -- from scratch",
+    run_name="2024-11-06 -- 1epochs -- from scratch",
     generation_max_length=128,
 )
 
