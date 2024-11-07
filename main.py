@@ -13,11 +13,11 @@ import numpy as np
 
 wandb.init(
     project="braille-translator",
-    name="2024-11-06 -- 1epoch -- from scratch"
+    name="2024-11-08 -- 1epoch -- from 4epoch"
 )
 
 model_name = "KETI-AIR/ke-t5-large-ko" # KETI-AIR/ke-t5-large-ko
-model = AutoModelForSeq2SeqLM.from_pretrained("/home/careforme.dropout/t5-large/results/241105/checkpoint-1200")
+model = AutoModelForSeq2SeqLM.from_pretrained("/home/careforme.dropout/t5-large/results/241108-4epochs/checkpoint-10000")
 tokenizer = AutoTokenizer.from_pretrained(model_name, legacy=False)
 wer_metric = load("wer")
 braille_dict = read_braille_tokens()
@@ -59,13 +59,26 @@ def compute_metrics(eval_pred):
         [token for token in np.argmax(pred, axis=-1) if token not in [0, 1, -100]]  # Filter unwanted tokens
         for pred in predictions[0]  # Iterate over predictions for each sequence
     ) # np.array 3D -> 2D
+    labels = [[label for label in sublist if label not in [0, 1, -100]] for sublist in labels]
 
     # Decode predictions and labels to text
+    # [['⠠⠝⠈⠌⠐⠗⠶⠋⠕']]
     decoded_preds = tokenizer.batch_decode(token_ids, skip_special_tokens=False)
     decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=False)
 
-    print("Decoded Predictions:", decoded_preds[0])
-    print("Decoded Labels:", decoded_labels[0])
+    # [['⠠', '⠝', '⠈', '⠌', '⠐', '⠗', '⠶', '⠋', '⠕']]
+    decoded_preds = [list(item) for item in decoded_preds]
+    decoded_labels = [list(item) for item in decoded_labels]
+
+    # ['⠠', '⠝', '⠈', '⠌', '⠐', '⠗', '⠶', '⠋', '⠕']
+    decoded_preds = [a for sublist in decoded_preds for a in sublist]
+    decoded_labels = [a for sublist in decoded_labels for a in sublist]
+
+    # Return Error if length is not identical (max_wer_score=1.0)
+    if len(decoded_preds) != len(decoded_labels):
+        min_length = min(len(decoded_preds), len(decoded_labels))
+        decoded_preds_flat = decoded_preds[:min_length]
+        decoded_labels_flat = decoded_labels[:min_length]
 
     # Compute the WAR score
     wer_results = wer_metric.compute(predictions=decoded_preds, references=decoded_labels)
@@ -77,7 +90,7 @@ def compute_metrics(eval_pred):
 
 # Define training arguments
 training_args = Seq2SeqTrainingArguments(
-    output_dir="./results/241106",
+    output_dir="./results/241108-5epochs",
     per_device_train_batch_size=12,
     per_device_eval_batch_size=8,
     # gradient_accumulation_steps=10,
@@ -87,9 +100,9 @@ training_args = Seq2SeqTrainingArguments(
     save_total_limit=10,
     save_steps=500,
     eval_strategy="steps",
-    eval_steps=250,
+    eval_steps=500,
     load_best_model_at_end=True,
-    learning_rate=1e-4,
+    learning_rate=1e-6,
     gradient_checkpointing=False,
     optim="paged_adamw_8bit",
     warmup_ratio=0.03,
@@ -101,7 +114,7 @@ training_args = Seq2SeqTrainingArguments(
     report_to="wandb",
     metric_for_best_model="wer_score",
     greater_is_better=False,
-    run_name="2024-11-06 -- 1epochs -- from scratch",
+    run_name="2024-11-08 -- 1epoch -- from 4epoch",
     generation_max_length=128,
 )
 
