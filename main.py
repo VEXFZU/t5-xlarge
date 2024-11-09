@@ -13,7 +13,6 @@ from data import load_data, add_braille_tokens
 import wandb
 import numpy as np
 
-
 def preprocess_function(examples, tokenizer, source_lang="Korean", target_lang="Braille"):
     inputs = [f"translate {source_lang} to {target_lang}: {ex}\n" for ex in examples["source"]]
     targets = examples["target"]
@@ -28,14 +27,25 @@ def compute_metrics(eval_pred):
     token_ids = (
         [token for token in np.argmax(pred, axis=-1) if token not in [0, 1, -100]]  # Filter unwanted tokens
         for pred in predictions[0]  # Iterate over predictions for each sequence
-    )  # np.array 3D -> 2D
 
     # Decode predictions and labels to text
+    # [['⠠⠝⠈⠌⠐⠗⠶⠋⠕']]
     decoded_preds = tokenizer.batch_decode(token_ids, skip_special_tokens=False)
     decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=False)
 
-    print("Decoded Predictions:", decoded_preds[0])
-    print("Decoded Labels:", decoded_labels[0])
+    # [['⠠', '⠝', '⠈', '⠌', '⠐', '⠗', '⠶', '⠋', '⠕']]
+    decoded_preds = [list(item) for item in decoded_preds]
+    decoded_labels = [list(item) for item in decoded_labels]
+
+    # ['⠠', '⠝', '⠈', '⠌', '⠐', '⠗', '⠶', '⠋', '⠕']
+    decoded_preds = [a for sublist in decoded_preds for a in sublist]
+    decoded_labels = [a for sublist in decoded_labels for a in sublist]
+
+    # Return Error if length is not identical (max_wer_score=1.0)
+    if len(decoded_preds) != len(decoded_labels):
+        min_length = min(len(decoded_preds), len(decoded_labels))
+        decoded_preds_flat = decoded_preds[:min_length]
+        decoded_labels_flat = decoded_labels[:min_length]
 
     # Compute the WAR score
     wer_results = wer_metric.compute(predictions=decoded_preds, references=decoded_labels)
@@ -44,7 +54,6 @@ def compute_metrics(eval_pred):
     return {
         "wer_score": wer_results
     }
-
 
 @dataclass
 class ExtraArguments:
