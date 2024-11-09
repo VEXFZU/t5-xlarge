@@ -69,7 +69,7 @@ print(device)
 encoder_outputs = []
 for example in few_shot_examples:
     # Tokenize and encode each example
-    inputs = tokenizer(example, return_tensors="pt", truncation=True, max_length=128)
+    inputs = tokenizer(example, return_tensors="pt", truncation=True, max_length=512)
 
     # Move input tensors to the same device as the model
     inputs = {key: value.to(device) for key, value in inputs.items()}
@@ -83,13 +83,13 @@ for example in few_shot_examples:
 concatenated_encoder_outputs = torch.cat(encoder_outputs, dim=1)
 
 # Now, encode the target input
-target_inputs = tokenizer(target_input, return_tensors="pt", truncation=True, max_length=128)
+target_inputs = tokenizer(target_input, return_tensors="pt", truncation=True, max_length=512)
 target_inputs = {key: value.to(device) for key, value in target_inputs.items()}
 
 target_output = model.encoder(input_ids=target_inputs["input_ids"], attention_mask=target_inputs["attention_mask"])
 
 # Concatenate the target encoded output with the few-shot examples
-final_encoder_outputs_tensor  = torch.cat([concatenated_encoder_outputs, target_output.last_hidden_state], dim=1)
+final_encoder_outputs_tensor  = torch.cat([target_output.last_hidden_state, concatenated_encoder_outputs], dim=1)
 
 # Wrap the tensor in BaseModelOutput
 final_encoder_outputs = BaseModelOutput(
