@@ -26,7 +26,7 @@ def compute_metrics(eval_pred):
     predictions, labels = eval_pred  # tuple
     token_ids = (
         [token for token in np.argmax(pred, axis=-1) if token not in [0, 1, -100]]  # Filter unwanted tokens
-        for pred in predictions[0]  # Iterate over predictions for each sequence
+        for pred in predictions[0])  # Iterate over predictions for each sequence
 
     # Decode predictions and labels to text
     # [['⠠⠝⠈⠌⠐⠗⠶⠋⠕']]
