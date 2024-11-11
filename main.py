@@ -48,7 +48,7 @@ def compute_metrics(eval_pred):
         decoded_labels_flat = decoded_labels[:min_length]
 
     # Compute the WAR score
-    wer_results = wer_metric.compute(predictions=decoded_preds, references=decoded_labels)
+    wer_results = wer_metric.compute(predictions=decoded_preds_flat, references=decoded_labels_flat)
     wandb.log({"wer_score": wer_results})
 
     return {
