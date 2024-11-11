@@ -16,8 +16,8 @@ import numpy as np
 def preprocess_function(examples, tokenizer, source_lang="Korean", target_lang="Braille"):
     inputs = [f"translate {source_lang} to {target_lang}: {ex}\n" for ex in examples["source"]]
     targets = examples["target"]
-    model_inputs = tokenizer(inputs, max_length=128, truncation=True, padding=True)
-    labels = tokenizer(targets, max_length=128, truncation=True, padding=True)
+    model_inputs = tokenizer(inputs, max_length=512, truncation=True, padding=True)
+    labels = tokenizer(targets, max_length=512, truncation=True, padding=True)
     model_inputs["labels"] = labels["input_ids"]
     return model_inputs
 
