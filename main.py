@@ -26,29 +26,24 @@ def compute_metrics(eval_pred):
     predictions, labels = eval_pred  # tuple
     token_ids = (
         [token for token in np.argmax(pred, axis=-1) if token not in [0, 1, -100]]  # Filter unwanted tokens
-        for pred in predictions[0])  # Iterate over predictions for each sequence
+        for pred in predictions[0])
 
-    # Decode predictions and labels to text
-    # [['⠠⠝⠈⠌⠐⠗⠶⠋⠕']]
+    # Decode predictions and labels
     decoded_preds = tokenizer.batch_decode(token_ids, skip_special_tokens=False)
     decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=False)
 
-    # [['⠠', '⠝', '⠈', '⠌', '⠐', '⠗', '⠶', '⠋', '⠕']]
-    decoded_preds = [list(item) for item in decoded_preds]
-    decoded_labels = [list(item) for item in decoded_labels]
+    # Split sequences into tokens and rejoin them for sentence-level predictions
+    decoded_preds = [" ".join(pred.split()) for pred in decoded_preds]
+    decoded_labels = [" ".join(label.split()) for label in decoded_labels]
 
-    # ['⠠', '⠝', '⠈', '⠌', '⠐', '⠗', '⠶', '⠋', '⠕']
-    decoded_preds = [a for sublist in decoded_preds for a in sublist]
-    decoded_labels = [a for sublist in decoded_labels for a in sublist]
-
-    # Return Error if length is not identical (max_wer_score=1.0)
+    # Ensure predictions and references have the same length
     if len(decoded_preds) != len(decoded_labels):
         min_length = min(len(decoded_preds), len(decoded_labels))
-        decoded_preds_flat = decoded_preds[:min_length]
-        decoded_labels_flat = decoded_labels[:min_length]
+        decoded_preds = decoded_preds[:min_length]
+        decoded_labels = decoded_labels[:min_length]
 
-    # Compute the WAR score
-    wer_results = wer_metric.compute(predictions=decoded_preds_flat, references=decoded_labels_flat)
+    # Compute the WER score
+    wer_results = wer_metric.compute(predictions=decoded_preds, references=decoded_labels)
     wandb.log({"wer_score": wer_results})
 
     return {
