@@ -68,10 +68,7 @@ def few_shot_inference(model, tokenizer, examples, target_input):
     # Encoding few-shot examples
     encoder_outputs = []
     for example in examples:
-        inputs = tokenizer(example, return_tensors="pt", truncation=True, max_length=512)
-
-        # inputs tensors -> GPU
-        inputs = {key: value.to(device) for key, value in inputs.items()}
+        inputs = tokenizer(example, return_tensors="pt", truncation=True, max_length=512).to(device)
 
         with torch.no_grad():
             output = model.encoder(input_ids=inputs["input_ids"], attention_mask=inputs["attention_mask"])
@@ -80,8 +77,7 @@ def few_shot_inference(model, tokenizer, examples, target_input):
     concatenated_encoder_outputs = torch.cat(encoder_outputs, dim=1)
 
     # Encoding target_inputs
-    target_inputs = tokenizer(target_input, return_tensors="pt", truncation=True, max_length=512)
-    target_inputs = {key: value.to(device) for key, value in target_inputs.items()}
+    target_inputs = tokenizer(target_input, return_tensors="pt", truncation=True, max_length=512).to(device)
 
     target_output = model.encoder(input_ids=target_inputs["input_ids"], attention_mask=target_inputs["attention_mask"])
 
