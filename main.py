@@ -16,8 +16,8 @@ import numpy as np
 def preprocess_function(examples, tokenizer, source_lang="Korean", target_lang="Braille"):
     inputs = [f"translate {source_lang} to {target_lang}: {ex}\n" for ex in examples["source"]]
     targets = examples["target"]
-    model_inputs = tokenizer(inputs, max_length=512, truncation=True, padding=True)
-    labels = tokenizer(targets, max_length=512, truncation=True, padding=True)
+    model_inputs = tokenizer(inputs, max_length=256, truncation=True, padding=True)
+    labels = tokenizer(targets, max_length=256, truncation=True, padding=True)
     model_inputs["labels"] = labels["input_ids"]
     return model_inputs
 
@@ -54,7 +54,7 @@ def compute_metrics(eval_pred):
 class ExtraArguments:
     # Model name / path (Tokenizer name or path will be the same if None)
     model_name_or_path: str = field(
-        default="KETI-AIR/ke-t5-large-ko"
+        default="sangmin6600/t5-v1_1-xl-ko"
     )
     tokenizer_name_or_path: str = field(
         default=None
@@ -130,7 +130,7 @@ if __name__ == "__main__":
         ).remove_columns(['source', 'target']) for i in raw_datasets.keys()
     }
 
-    tokenized_datasets['eval'] = tokenized_datasets['eval'].select(range(20)).shuffle(seed=42)
+    tokenized_datasets['eval'] = tokenized_datasets['eval'].select(range(150)).shuffle(seed=42)
 
     # Define Data Collator
     data_collator = DataCollatorForSeq2Seq(tokenizer, model)
