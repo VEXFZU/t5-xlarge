@@ -1,6 +1,7 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from transformers.modeling_outputs import BaseModelOutput
+import time
 
 def read_korean_braille_pairs(file_path):
     """
@@ -43,8 +44,8 @@ def preprocess_few_shot_prompt(korean=None, braille=None):
 
     return prompts
 
-def translate_text(text, source_lang="한국어", target_lang="점자", max_length=128):
-    input_text = f"{source_lang}를 {target_lang}로 변환하세요.\n{source_lang}: {text}\n{target_lang}:"
+def translate_text(text, source_lang="한국어", target_lang="점자", max_length=256):
+    input_text = f'translate Korean to Braille: {text}\nBraille:'
     inputs = tokenizer(input_text, return_tensors="pt", max_length=max_length, truncation=True)
 
     # Move inputs to GPU if available
@@ -105,16 +106,20 @@ def few_shot_inference(model, tokenizer, examples, target_input):
     result = tokenizer.decode(outputs[0], skip_special_tokens=False)
     return result
 
-model_name = "azaraks/t5-v1.1-large-ko-to-kb"
-fewshot_path = "fewshot-examples/241110.txt"
+model_name = "/home/elicer/t5-xlarge/results/checkpoint-10000"
+# fewshot_path = "fewshot-examples/241110.txt"
 
-tokenizer = AutoTokenizer.from_pretrained(model_name, revision="v0e5", force_download=True)
-model = AutoModelForSeq2SeqLM.from_pretrained(model_name, revision="v0e5", force_download=True)
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
 model.to('cuda')
 
-Korean, Braille = read_korean_braille_pairs(fewshot_path)
-few_shot_examples = preprocess_few_shot_prompt(Korean, Braille)
+# Korean, Braille = read_korean_braille_pairs(fewshot_path)
+# few_shot_examples = preprocess_few_shot_prompt(Korean, Braille)
 
 target_input = "①, ②"
-result = few_shot_inference(model, tokenizer, few_shot_examples, target_input)
-print(result)
+# result = few_shot_inference(model, tokenizer, few_shot_examples, target_input)
+
+# zero shot
+start = time.time()
+print(tokenizer.batch_decode(translate_text("역시 모델 사이즈가 큰 게 짱이었자나? 인공지능도 자본주의에 물들었구만!"), skip_special_tokens=False))
+print(time.time() - start)

@@ -44,10 +44,12 @@ def compute_metrics(eval_pred):
 
     # Compute the WER score
     wer_results = wer_metric.compute(predictions=decoded_preds, references=decoded_labels)
-    wandb.log({"wer_score": wer_results})
+    cer_results = cer_metric.compute(predictions=decoded_preds, references=decoded_labels)
+    wandb.log({"wer_score": wer_results, "cer_score": cer_results})
 
     return {
-        "wer_score": wer_results
+        "wer_score": wer_results,
+        "cer_score": cer_results
     }
 
 @dataclass
@@ -130,13 +132,14 @@ if __name__ == "__main__":
         ).remove_columns(['source', 'target']) for i in raw_datasets.keys()
     }
 
-    tokenized_datasets['eval'] = tokenized_datasets['eval'].select(range(150)).shuffle(seed=42)
+    tokenized_datasets['eval'] = tokenized_datasets['eval'].select(range(250)).shuffle(seed=42)
 
     # Define Data Collator
     data_collator = DataCollatorForSeq2Seq(tokenizer, model)
 
     # initialize metric wer
     wer_metric = load("wer")
+    cer_metric = load("cer")
 
     # Set up Trainer
     trainer = Seq2SeqTrainer(
