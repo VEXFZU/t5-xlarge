@@ -106,20 +106,22 @@ def few_shot_inference(model, tokenizer, examples, target_input):
     result = tokenizer.decode(outputs[0], skip_special_tokens=False)
     return result
 
-model_name = "/home/elicer/t5-xlarge/results/checkpoint-10000"
-# fewshot_path = "fewshot-examples/241110.txt"
+model_name = "results/checkpoint-78395"
+fewshot_path = "/home/elicer/t5-xlarge/fewshot-examples/1.txt "
+target_input = "삶과 죽음을 넘나드는 험난한 인생에서"
 
 tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
-model.to('cuda')
+model = AutoModelForSeq2SeqLM.from_pretrained(model_name).to('cuda')
 
-# Korean, Braille = read_korean_braille_pairs(fewshot_path)
-# few_shot_examples = preprocess_few_shot_prompt(Korean, Braille)
+# Load fewshot
+Korean, Braille = read_korean_braille_pairs(fewshot_path)
+few_shot_examples = preprocess_few_shot_prompt(Korean, Braille)
 
-target_input = "①, ②"
-# result = few_shot_inference(model, tokenizer, few_shot_examples, target_input)
+# Fewshot inference
+result_fewshot = few_shot_inference(model, tokenizer, few_shot_examples, target_input)
 
 # zero shot
-start = time.time()
-print(tokenizer.batch_decode(translate_text("역시 모델 사이즈가 큰 게 짱이었자나? 인공지능도 자본주의에 물들었구만!"), skip_special_tokens=False))
-print(time.time() - start)
+result_zeroshot = tokenizer.batch_decode(translate_text(target_input), skip_special_tokens=False)
+
+print(f"Early-fusion fewshot: {result_fewshot}")
+print(f"Zeroshot: {result_zeroshot}")
