@@ -3,6 +3,7 @@ from evaluate import load
 from time import time
 from tqdm import tqdm
 import json
+import argparse
 
 def read_json(f_path):
   with open(f_path, 'r', encoding='utf-8') as file:
@@ -64,12 +65,17 @@ Avg WER: {wer/length}
 Avg CER: {cer/length}
     """)
 
-model_name = "results/checkpoint-78395"
-revision = "checkpoint-78395"
+parser = argparse.ArgumentParser()
+parser.add_argument("--model_name", type=str, default="SabaPivot/t5-xlarge-ko-kb-2", required=True, help="Path to the model checkpoint.")
+parser.add_argument("--revision", type=str, default="", required=False, help="Revision name for the checkpoint.")
+
+args = parser.parse_args()
+model_name = args.model_name
+revision = args.revision
 benchmark_path = "평가지표.json"
 
-model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
-tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForSeq2SeqLM.from_pretrained(model_name, revision=revision)
+tokenizer = AutoTokenizer.from_pretrained(model_name, revision=revision)
 
 inputs, targets = read_json(benchmark_path)
 outputs = []
