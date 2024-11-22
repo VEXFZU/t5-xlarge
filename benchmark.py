@@ -67,7 +67,7 @@ Avg CER: {cer/length}
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_name", type=str, default="SabaPivot/t5-xlarge-ko-kb-2", required=True, help="Path to the model checkpoint.")
-parser.add_argument("--revision", type=str, default="", required=False, help="Revision name for the checkpoint.")
+parser.add_argument("--revision", type=str, default="main", required=False, help="Revision name for the checkpoint.")
 
 args = parser.parse_args()
 model_name = args.model_name
