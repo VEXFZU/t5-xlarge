@@ -5,10 +5,10 @@ This repository contains code for fine-tuning the T5-XLarge model for text gener
 ## Setup
 
 ### Requirements
-- Python 3.8+
-- PyTorch 2.0+
-- Transformers 4.30+
-- 16GB+ GPU recommended
+- Python 3.10+
+- PyTorch 2.11+
+- Transformers 4.45.2+
+- 40GB+ GPU recommended
 
 Install dependencies:
 ```
