@@ -6,10 +6,10 @@
 
 ### 요구 사양
 - Python 3.10+
-- PyTorch 2.11+
 - Cuda 12.4+
+- PyTorch 2.11+
 - Transformers 4.45.2+
-- 40GB+ GPU recommended
+- 40GB+ GPU 권장
 
 필요 라이브러리 설치:
 ```
@@ -45,16 +45,11 @@ t5-xlarge/
 ├── benchmark.py         # 평가 스크립트
 ├── benchmark.sh         # 평가 실행 스크립트
 ├── special_braille.txt  # special token으로 추가할 점자 목록
-├── requierments.txt     # 필요 라이브러리
+├── requirements.txt     # 필요 라이브러리
 └── README.md
 ```
 
-## 모델 훈련
-본 훈련 스크립트는 다음을 지원합니다.
-- Mixed precision
-- Checkpoint 저장
-- Evaluation 중 WER 및 CER 메트릭 계산 및 로깅
-- Wandb 로깅
+### 사용 데이터
 
 ### 베이스 모델
 본 프로젝트는 huggingface hub에 업로드 된`sangmin6600/t5-v1_1-xl-ko` 를 fine-tuning한 모델을 사용하였습니다.
@@ -74,9 +69,6 @@ python src/evaluate.py \
     --model_path models/checkpoint-best \
     --test_file data/test.json
 ```
-
-## License
-MIT
 
 ## Contact
 For questions or issues, please open a GitHub issue.
