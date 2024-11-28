@@ -76,7 +76,7 @@ t5-xlarge/
 │   ├── data.py               # 훈련 데이터 전처리 스크립트
 │   ├── automated_upload.py   # 모델 자동 업로드 스크립트
 │   └── special_braille.txt   # special token으로 추가할 점자 목록 .txt 파일
-├── requierments.txt
+├── requirements.txt
 ├── README.md
 └── LICENSE
 ```
