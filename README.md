@@ -111,9 +111,9 @@ MODEL_NAME=${MODEL_NAME:-"사용할 모델 이름"}
 TOKENIZER_NAME=${TOKENIZER_NAME:-"사용할 토크나이저 이름"}
 ```
 
-## 연락처
-질문 또는 이슈가 있을 경우, Github 이슈를 생성해주세요.
-
-### 참고 문헌
+## 참고 문헌
 - Few-shot ICL에 사용된 방법은 논문 "Exploiting the Potential of Seq2Seq Models as Robust Few-Shot Learners"에 기재된 방법을 사용하였으며, 코드는 직접 구현하였습니다. 해당 논문은 [arXiv:2305.18354](https://arxiv.org/abs/2305.18354)에서 확인할 수 있습니다.
 - 벤치마크 비교에는 논문 "Translating Braille into Chinese based on improved CBHG model"이 포함되어 있으며, 해당 논문은 [ScienceDirect](https://www.sciencedirect.com/science/article/abs/pii/S0141938223000781)에서 확인할 수 있습니다.
+
+## 연락처
+질문 또는 이슈가 있을 경우, Github 이슈를 생성해주세요.
