@@ -2,6 +2,7 @@ import torch
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from transformers.modeling_outputs import BaseModelOutput
 import time
+import argparse
 
 def read_korean_braille_pairs(file_path):
     """
@@ -104,12 +105,19 @@ def few_shot_inference(model, tokenizer, examples, target_input):
     result = tokenizer.decode(outputs[0], skip_special_tokens=False)
     return result
 
-model_name = "results/checkpoint-78395"
-fewshot_path = "/home/elicer/t5-xlarge/fewshot-examples/1.txt "
-target_input = "삶과 죽음을 넘나드는 험난한 인생에서"
+parser = argparse.ArgumentParser()
+parser.add_argument("--model_name", type=str, default="SabaPivot/t5-xlarge-ko-kb-2", required=True, help="Path to the model checkpoint.")
+parser.add_argument("--revision", type=str, default="main", required=False, help="Revision name for the checkpoint.")
+parser.add_argument("--fewshot_path", type=str, default="fewshot-examples.txt", required=True, help="Path to the fewshot examples file.")
+parser.add_argument("--target_input", type=str, default="삶과 죽음을 넘나드는 험난한 인생에서", required=True, help="Target input to translate.")
+args = parser.parse_args()
 
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForSeq2SeqLM.from_pretrained(model_name).to('cuda')
+model_name = args.model_name
+fewshot_path = args.fewshot_path
+target_input = args.target_input
+
+model = AutoModelForSeq2SeqLM.from_pretrained(model_name, revision=revision).to('cuda')
+tokenizer = AutoTokenizer.from_pretrained(model_name, revision=revision)
 
 # Load fewshot
 Korean, Braille = read_korean_braille_pairs(fewshot_path)
