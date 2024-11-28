@@ -29,8 +29,8 @@ chmod +x train.sh
 ### 평가 스크립트 실행
 1. 평가하고자 하는 점역 모델을 huggingface hub에 업로드 하거나, local에 저장합니다.
 2. `benchmark.sh` 파일에 huggingface hub에 업로드 한 모델 이름 또는 local에 저장한 모델 경로를 설정합니다.
-3. 사용하고자 하는 모델의 특정 버전이 있을 경우, `benchmark.sh` 파일의 `revision` 파라미터를 설정합니다. 
-4. 모델 평가에 사용할 데이터셋을 `benchmark.sh` 파일의 `benchmark_path` 파라미터에 설정합니다.
+3. 사용하고자 하는 모델의 특정 버전이 있을 경우, `revision` 파라미터를 설정합니다. 
+4. 모델 평가에 사용할 데이터셋을 `benchmark_path` 파라미터에 설정합니다.
 5. 평가를 실행합니다.
 ```
 chmod +x benchmark.sh
