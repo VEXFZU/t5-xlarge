@@ -29,13 +29,11 @@ def read_braille_tokens():
 def load_and_merge_braille_lists(file_path):
     merged_list = []
 
-    # Open the JSON file and load the data
     with open(file_path, "r", encoding="utf-8") as file:
         data = json.load(file)
 
-    # Iterate over all lists in the JSON and merge them
     for key, value in data.items():
-        if isinstance(value, list):  # Ensure the value is a list
+        if isinstance(value, list):
             merged_list.extend(value)
     return merged_list
 

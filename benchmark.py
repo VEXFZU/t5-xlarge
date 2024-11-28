@@ -68,11 +68,12 @@ Avg CER: {cer/length}
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_name", type=str, default="SabaPivot/t5-xlarge-ko-kb-2", required=True, help="Path to the model checkpoint.")
 parser.add_argument("--revision", type=str, default="main", required=False, help="Revision name for the checkpoint.")
+parser.add_argument("--benchmark_path", type=str, default="benchmark.json", required=True, help="Path to the benchmark file.")
 
 args = parser.parse_args()
 model_name = args.model_name
 revision = args.revision
-benchmark_path = "평가지표.json"
+benchmark_path = args.benchmark_path
 
 model = AutoModelForSeq2SeqLM.from_pretrained(model_name, revision=revision)
 tokenizer = AutoTokenizer.from_pretrained(model_name, revision=revision)
