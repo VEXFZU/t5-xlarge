@@ -27,29 +27,43 @@ chmod +x train.sh
 ```
 
 ### 평가 스크립트 실행
-1.
-2.
-3.
+1. 평가하고자 하는 점역 모델을 huggingface hub에 업로드 하거나, local에 저장합니다.
+2. `benchmark.sh` 파일에 huggingface hub에 업로드 한 모델 이름 또는 local에 저장한 모델 경로를 설정합니다.
+3. 사용하고자 하는 모델의 특정 버전이 있을 경우, `revision` 파라미터를 설정합니다. 
+4. 모델 평가에 사용할 데이터셋을 `benchmark_path` 파라미터에 설정합니다.
+5. 평가를 실행합니다.
 ```
 chmod +x benchmark.sh
 ./benchmark.sh
 ```
 
-## Project Structure
+## 폴더 구조
 ```
 t5-xlarge/
-├── dataset/             # 학습 데이터
-├── main.py              # 훈련 스크립트
-├── data.py              # 데이터 처리 스크립트
-├── train.sh             # 훈련 실행 스크립트
-├── benchmark.py         # 평가 스크립트
-├── benchmark.sh         # 평가 실행 스크립트
-├── special_braille.txt  # special token으로 추가할 점자 목록
-├── requirements.txt     # 필요 라이브러리
-└── README.md
+├── main.py
+├── train.sh
+├── benchmark.py
+├── benchmark.sh
+├── early-fusion-ICL
+│   ├── fewshot_inference.py
+│   └── fewshot_inference.sh
+├── utils
+│   ├──data.py
+│   ├──resume.py
+│   └── special_braille.txt
+├── requierments.txt
+├── README.md
+├── LICENSE
 ```
 
 ### 사용 데이터
+본 프로젝트에서는 국립 국어원에서 제공하는 묵자-점자 병렬 말뭉치 2023을 사용합니다. 이 데이터셋은 한국어 텍스트와 그에 대응하는 점자 번역을 포함하고 있으며, 모델 훈련 및 평가에 사용됩니다.
+
+- **데이터 형식**: JSON
+- **데이터 크기**: 약 125,000쌍 한국-점자 병렬 문장
+- **사용 권한**: 연구 및 기술 개발용으로 승인된 목적에 한하여 사용 가능
+- **출처**: [국립 국어원](https://kli.korean.go.kr/)
+
 
 ### 베이스 모델
 본 프로젝트는 huggingface hub에 업로드 된`sangmin6600/t5-v1_1-xl-ko` 를 fine-tuning한 모델을 사용하였습니다.
@@ -61,14 +75,5 @@ MODEL_NAME=${MODEL_NAME:-"사용할 모델 이름"}
 TOKENIZER_NAME=${TOKENIZER_NAME:-"사용할 토크나이저 이름"}
 ```
 
-## Evaluation
-
-Run evaluation on a test set:
-```
-python src/evaluate.py \
-    --model_path models/checkpoint-best \
-    --test_file data/test.json
-```
-
-## Contact
-For questions or issues, please open a GitHub issue.
+## 연락처
+질문 또는 이슈가 있을 경우, Github 이슈를 생성해주세요.
