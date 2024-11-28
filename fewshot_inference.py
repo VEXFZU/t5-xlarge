@@ -48,7 +48,6 @@ def translate_text(text, source_lang="한국어", target_lang="점자", max_leng
     input_text = f'translate Korean to Braille: {text}\nBraille:'
     inputs = tokenizer(input_text, return_tensors="pt", max_length=max_length, truncation=True)
 
-    # Move inputs to GPU if available
     if torch.cuda.is_available():
         inputs = {k: v.to("cuda") for k, v in inputs.items()}
 
@@ -59,14 +58,13 @@ def translate_text(text, source_lang="한국어", target_lang="점자", max_leng
         num_beams=4,
         early_stopping=True
     )
-    # translated_text = tokenizer.decode(outputs[0], skip_special_tokens=False)
     return outputs
 
 
 def few_shot_inference(model, tokenizer, examples, target_input):
     # Early-fusion 구현
     device = model.device
-    # Encoding few-shot examples
+
     encoder_outputs = []
     for example in examples:
         inputs = tokenizer(example, return_tensors="pt", truncation=True, max_length=512).to(device)
