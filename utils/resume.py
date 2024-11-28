@@ -3,6 +3,11 @@ import time
 import shutil
 import subprocess
 
+# 이 파일은 새로운 checkpoint가 생성되면 자동으로 huggingface에 업로드를 하는 스크립트입니다.
+# 업로드 이후에는 로컬에 있는 checkpoint 폴더를 삭제합니다.
+# nohup python resume.py > output.log 2>&1 &
+# 위의 명령어로 실행하시면 됩니다
+
 watch_path = "./results"
 max_dirs = 1
 check_interval = 60
