@@ -37,32 +37,40 @@ def translate_text(text, model, tokenizer, max_length=256):
     return output
 
 def eval(preds, targets):
+    bleu_metric = load("google_bleu")
     wer_metric = load("wer")
     cer_metric = load("cer")
     length = len(preds)
-    correct, wer, cer = 0, 0, 0
+    correct, wer, cer, bleu = 0, 0, 0, 0
+    wrong_list = []
     for i, (pred, target) in enumerate(zip(preds, targets)):
         target = target[:len(pred)]
         pred = pred[:len(target)]
-
         wer_score = wer_metric.compute(predictions=[pred], references=[target])
         cer_score = cer_metric.compute(predictions=[pred], references=[target])
+        bleu_score = bleu_metric.compute(predictions=[pred], references=[[target]])
         wer += wer_score
         cer += cer_score
+        bleu += bleu_score['google_bleu']
 
         if wer_score == 0:
             correct += 1
         else:
+            wrong_list.append(i+1)
+            print(f"sample number: {i+1}")
             print(f"target: {target}")
             print(f"pred: {pred}")
             print(f"WER Score: {wer_score}")
             print(f"CER Score: {cer_score}")
+            print(f"BLEU Score: {bleu_score['google_bleu']}")
 
     print(f"""
 Correct: {correct}
 Correct Rate: {correct/length},
 Avg WER: {wer/length}
 Avg CER: {cer/length}
+Avg BLEU: {bleu/length}
+Incorrect Sample: {wrong_list}
     """)
 
 parser = argparse.ArgumentParser()
