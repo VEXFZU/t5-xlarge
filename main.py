@@ -9,9 +9,10 @@ from transformers import (
     AutoTokenizer,
 )
 from evaluate import load
-from data import load_data, add_braille_tokens
+from utils.data import load_data, add_braille_tokens
 import wandb
 import numpy as np
+
 
 def preprocess_function(examples, tokenizer, source_lang="Korean", target_lang="Braille"):
     inputs = [f"translate {source_lang} to {target_lang}: {ex}\n" for ex in examples["source"]]
@@ -22,7 +23,7 @@ def preprocess_function(examples, tokenizer, source_lang="Korean", target_lang="
     return model_inputs
 
 
-def compute_metrics(eval_pred):
+def compute_metrics(eval_pred, tokenizer, metrics):
     predictions, labels = eval_pred  # tuple
     token_ids = (
         [token for token in np.argmax(pred, axis=-1) if token not in [0, 1, -100]]  # Filter unwanted tokens
@@ -43,14 +44,15 @@ def compute_metrics(eval_pred):
         decoded_labels = decoded_labels[:min_length]
 
     # Compute the WER score
-    wer_results = wer_metric.compute(predictions=decoded_preds, references=decoded_labels)
-    cer_results = cer_metric.compute(predictions=decoded_preds, references=decoded_labels)
+    wer_results = metrics['wer'].compute(predictions=decoded_preds, references=decoded_labels)
+    cer_results = metrics['cer'].compute(predictions=decoded_preds, references=decoded_labels)
     wandb.log({"wer_score": wer_results, "cer_score": cer_results})
 
     return {
         "wer_score": wer_results,
         "cer_score": cer_results
     }
+
 
 @dataclass
 class ExtraArguments:
@@ -86,7 +88,7 @@ class ExtraArguments:
     )
 
 
-if __name__ == "__main__":
+def main():
     parser = HfArgumentParser((ExtraArguments,
                                Seq2SeqTrainingArguments,
                                ))
@@ -154,3 +156,7 @@ if __name__ == "__main__":
 
     # Start Training
     trainer.train()
+
+
+if __name__ == "__main__":
+    main()

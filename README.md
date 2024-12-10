@@ -55,8 +55,8 @@ chmod +x benchmark.sh
 ### few-shot ICL 추론
 Auto-regressive 모델에서 주로 사용되는 few-shot In-context Learning(ICL)을 수행합니다. 논문 [Exploiting the Potential of Seq2Seq Models as Robust Few-Shot Learners](https://arxiv.org/abs/2305.18354)에서 소개된 방법을 참고하여 **early-fusion 기법**을 사용하였습니다. <br>
 few-shot ICL과 zero-shot의 성능을 비교하기 위하여, few-shot 예시가 반영되지 않은 zero-shot 결과도 함께 표시됩니다.
-![Few-shot ICL Performance Comparison](image-1.png)
-![Zero-shot vs Few-shot Results](image.png)
+![Few-shot ICL Performance Comparison](images/few-shot-icl-performance.png)
+![Zero-shot vs Few-shot Results](images/zero-shot-vs-few-shot.png)
 
 하지만 few-shot ICL의 사용은 점역 모델의 성능 저하를 가져왔습니다. 논문에서 실험에 사용한 T5 모델의 최소 규모가 11B라는 점을 감안하였을 때: <br>
 1) 본 프로젝트의 T5-xlarge(3B) 모델의 작은 규모 <br>
